@@ -1,5 +1,9 @@
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 from sklearn import datasets
+
+output_path = Path("fig/swiss_roll.pdf")
 
 sr_points, sr_color = datasets.make_swiss_roll(n_samples=1500, random_state=0)
 
@@ -28,8 +32,9 @@ ax_2d.set_ylabel(r"Height $h$")
 
 fig.colorbar(scatter_3d, ax=[ax_3d, ax_2d], label=r"Position in the roll $t$", shrink=0.8)
 
+output_path.parent.mkdir(parents=True, exist_ok=True)
 fig.savefig(
-    "swiss_roll.pdf",
+    output_path,
     bbox_inches="tight",
     dpi=300,
 )
