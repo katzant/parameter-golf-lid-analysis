@@ -18,3 +18,4 @@ final_model.pt
 lid.csv
 runs/
 fig/
+kendall_tau*.csv
