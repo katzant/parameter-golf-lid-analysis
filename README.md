@@ -1,5 +1,10 @@
 # Analyzing and Intervening on Local Intrinsic Dimensions during Pre-Training of Small Transformer Models
 
+## Overview
+
+This repository includes code for analyzing the internal representations produced by contextual language models during training.
+To quantify changes in internal representations, changes in the local intrinsic dimension (LID) are measured throughout training.
+
 ## Prerequisites
 
 - Python 3.12
