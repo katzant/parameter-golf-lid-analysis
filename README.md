@@ -14,7 +14,7 @@ The project addresses three questions:
 - How does it relate to cross-entropy loss?
 - Does increasing model depth lower the LID, and how does this affect loss?
 
-The setup follows the LID methodology of [Ruppik et al. (2025)](https://proceedings.neurips.cc/paper_files/paper/2025/file/61c2c6338033da68885e0226881cbe71-Paper-Conference.pdf), applied to the pre-training of small models instead of large models during fine-tuning. The baseline runs use 20,000 steps and 5 seeds; the depth experiments use 3 seeds per configuration.
+The setup follows the LID methodology of [Ruppik et al. (2025)](https://proceedings.neurips.cc/paper_files/paper/2025/file/61c2c6338033da68885e0226881cbe71-Paper-Conference.pdf), applied to the pre-training of small models instead of large models during fine-tuning. The baseline runs use 20,000 steps and 5 seeds; the depth experiments use 3 seeds per configuration. Training code is based on the [parameter-golf](https://github.com/openai/parameter-golf) baseline (also see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 
 ## Results
 
@@ -42,6 +42,9 @@ The setup follows the LID methodology of [Ruppik et al. (2025)](https://proceedi
 
 - Python 3.12
 - [`uv`](https://docs.astral.sh/uv/) package manager
+- NVIDIA GPU with CUDA support (training was run on a NVIDIA A100 GPU 40GB, taking approximately 5 hours to train for 20,000 steps)
+
+  Note that the LID computations cannot be run on a GPU, taking around two hours on an Intel Xeon E-2288G.
 
 ### Setup
 
@@ -52,6 +55,10 @@ git clone https://github.com/katzant/parameter-golf-lid-analysis.git
 cd parameter-golf-lid-analysis
 uv sync
 ```
+
+### Running on an HPC cluster
+
+
 
 ## Usage
 
@@ -141,6 +148,10 @@ runs/<run-id>/
 ```
 
 The main LID results use the unquantized checkpoint files. Fixed-sample losses from the analyzer should be paired with LID when comparing the same evaluation sequences.
+
+## Running on an HPC cluster
+
+The experiments can be run on a HPC cluster using PBS job arrays. `train_job.sh` runs a single training job, `train_job_array.sh` submits an array in which each task trains one configuration. The array index selects training seed and run id. Adjust the resource requests (`#PBS` lines), paths and module/environment setup in the scripts to your cluster before submitting.
 
 ## References
 
