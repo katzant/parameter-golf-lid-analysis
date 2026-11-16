@@ -26,9 +26,13 @@ The setup follows the LID methodology of [Ruppik et al. (2025)](https://proceedi
 
    Both LID and loss drop in the first phase. Between steps 200 and 2,400, LID rises while loss keeps falling, exhibiting a strong negative correlation. In the late phase both stabilize and the relationship weakens. LID therefore has no monotonic relationship with performance measured through loss during pre-training, and the rise in LID does not indicate overfitting. This differs from findings reported for fine-tuning by [Ruppik et al. (2025)](https://proceedings.neurips.cc/paper_files/paper/2025/file/61c2c6338033da68885e0226881cbe71-Paper-Conference.pdf).
 
-3. **Greater depth lowers coincides with lower LID and loss**
+   ![Cross-entropy losses and mean local intrinsic dimension over the course of pre-training. Lines and shaded regions show the mean and standard deviation, respectively, across five baseline seeds. Checkpoints from steps 200 to 20, 000 are shown. LID was estimated using (M, N, L) = (256, 16384, 128).](/assets/baseline_loss_and_lid.png)
+
+4. **Greater depth lowers coincides with lower LID and loss**
 
    Going from 9 to 25 layers (in steps of 4) reduces validation LID from ~17.94 to ~15.26 and validation loss from ~2.02 to ~1.87, with diminishing returns for additional layers. This is not evidence of a causal link, since depth also changes parameter count, compute cost and long-skip connections.
+
+   ![Cross-entropy loss (top row) and mean local intrinsic dimension (bottom row) during pre-training for models with 9, 13, 17, 21 and 25 layers, evaluated on fixed first shard training (left) and validation (right) samples. Lines and shaded regions show the mean and standard deviation across three training seeds. Checkpoints from step 200 to 20, 000 are shown. LID was estimated using (M, N, L) = (256, 16384, 128).](/assets/depth_loss_and_lid.png)
 
 Takeaway: LID provides information about internal geometry that loss alone does not. It is useful as a complementary diagnostic of pre-training dynamics, not as a sole performance indicator.
 
