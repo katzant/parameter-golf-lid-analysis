@@ -84,7 +84,7 @@ Run the LID analysis based on the checkpoints saved from `train_gpt.py`:
 
 ```bash
 NUM_LAYERS=9 uv run python estimate_analyze_lid.py \
-  --run-id <RUN_ID> \
+  --run-id baseline_seed_1337 \
   --num-sampled-sequences 256 \
   --num-sampled-token-vectors 16384 \
   --neighborhood-size 128 \
@@ -97,6 +97,27 @@ NUM_LAYERS=9 uv run python estimate_analyze_lid.py \
 The analysis script samples non-overlapping sequences from the first sorted training shard and first sorted validation shard. It extracts final-normalized representations, removes vectors for token IDs 0, 1, and 2, deduplicates vectors, subsamples, and estimates local dimension. If too few distinct eligible vectors remain, the vector sampler uses fewer than the requested `N`. Keep the neighborhood size below the available sample size.
 
 Match the model and data settings to the checkpoint. The analyzer constructs the model from the current environment and does not restore architecture or data paths from the saved run configuration. For a 25-layer checkpoint, set `NUM_LAYERS=25`. Also compare against the saved `runs/<run-id>/config.json`.
+
+### 4. Plot results and compute correlations
+
+For the completed run above:
+
+```bash
+uv run python plot_loss_and_lid.py \
+  --run-id baseline_seed_1337 \
+  --analysis-id <ANALYSIS_ID> \
+
+uv run python plot_lid_vs_loss.py \
+  --run-id baseline_seed_1337 \
+  --analysis-id <ANALYSIS_ID> \
+
+uv run python compute_kendall_tau.py \
+  --run-id baseline_seed_1337 \
+  --analysis-id <ANALYSIS_ID> \
+  --min-step 200 --max-step 2400 --aggregation per-seed \
+```
+For multi-seed plots, supply further IDs after `--run-id` and the same number of matching IDs after `--analysis-id` in the same order.
+
 
 ## Project Structure
 
