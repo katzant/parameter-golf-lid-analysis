@@ -1,16 +1,45 @@
-# Analyzing and Intervening on Local Intrinsic Dimensions during Pre-Training of Small Transformer Models
+# Local Intrinsic Dimension during Transformer Pre-Training
+
+
 
 ## Overview
 
-This repository includes code for analyzing the internal representations produced by contextual language models during training.
-To quantify changes in internal representations, changes in the local intrinsic dimension (LID) are measured throughout training.
+Code for my bachelor thesis *Analyzing and Intervening on Local Intrinsic Dimensions during Pre-Training of Small Transformer Models*.
 
-## Prerequisites
+Loss and task metrics say little about the geometry of a language model’s representation space during training. This project trains a small decoder-only Transformer (~17M parameters) from scratch on a subset of FineWeb and tracks the **mean local intrinsic dimension (LID)** of its contextual token embeddings throughout pre-training. LID is estimated with a localized TwoNN estimator and needs neither labeled data nor task-specific metrics.
+
+The project addresses three questions:
+
+- How does mean LID develop during pre-training?
+- How does it relate to cross-entropy loss?
+- Does increasing model depth lower the LID, and how does this affect loss?
+
+The setup follows the LID methodology of [Ruppik et al. (2025)](https://proceedings.neurips.cc/paper_files/paper/2025/file/61c2c6338033da68885e0226881cbe71-Paper-Conference.pdf), applied to the pre-training of small models instead of large models during fine-tuning. The baseline runs use 20,000 steps and 5 seeds; the depth experiments use 3 seeds per configuration.
+
+## Results
+
+1. **The mean local intrinsic dimension follows a non-monotonic, three-phase trajectory**
+   
+   Across five training seeds, mean LID drops from approximately 116.5 at initialization to 9.2 at step 200, rises to about 16.3 by step 2,400, then settles around 17-18 till the end of training. 
+
+2. **The relationship between LID and loss depends on the training phase**
+
+   Both LID and loss drop in the first phase. Between steps 200 and 2,400, LID rises while loss keeps falling, exhibiting a strong negative correlation. In the late phase both stabilize and the relationship weakens. LID therefore has no monotonic relationship with performance measured through loss during pre-training, and the rise in LID does not indicate overfitting. This differs from findings reported for fine-tuning by [Ruppik et al. (2025)](https://proceedings.neurips.cc/paper_files/paper/2025/file/61c2c6338033da68885e0226881cbe71-Paper-Conference.pdf).
+
+3. **Greater depth lowers coincides with lower LID and loss**
+
+   Going from 9 to 25 layers (in steps of 4) reduces validation LID from ~17.94 to ~15.26 and validation loss from ~2.02 to ~1.87, with diminishing returns for additional layers. This is not evidence of a causal link, since depth also changes parameter count, compute cost and long-skip connections.
+
+Takeaway: LID provides information about internal geometry that loss alone does not. It is useful as a complementary diagnostic of pre-training dynamics, not as a sole performance indicator.
+
+## Installation
+
+### Prerequisites
 
 - Python 3.12
 - [`uv`](https://docs.astral.sh/uv/) package manager
 
-## Setup
+### Setup
 
 Clone the repository and install python dependencies with uv:
 
@@ -53,3 +82,11 @@ uv run python estimate_analyze_lid.py \
 ```
 
 Outputs the results to `lid.csv`.
+
+## References
+
+Ruppik, B. M., von Rohrscheidt, J., van Niekerk, C., Heck, M., Vukovic, R., Feng, S., Lin, H.-c.,
+Lubis, N., Rieck, B., Zibrowius, M., and Gasic, M. (2025). Less Is More: Local Intrinsic Dimen-
+sions of Contextual Language Models. Advances in Neural Information Processing Systems. Ed.
+by D. Belgrave, C. Zhang, H. Lin, R. Pascanu, P. Koniusz, M. Ghassemi, and N. Chen. Vol. 38.
+Curran Associates, Inc., pp. 67795–67828.
