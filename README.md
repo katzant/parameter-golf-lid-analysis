@@ -26,13 +26,13 @@ The setup follows the LID methodology of [Ruppik et al. (2025)](https://proceedi
 
    Both LID and loss drop in the first phase. Between steps 200 and 2,400, LID rises while loss keeps falling, exhibiting a strong negative correlation. In the late phase both stabilize and the relationship weakens. LID therefore has no monotonic relationship with performance measured through loss during pre-training, and the rise in LID does not indicate overfitting. This differs from findings reported for fine-tuning by [Ruppik et al. (2025)](https://proceedings.neurips.cc/paper_files/paper/2025/file/61c2c6338033da68885e0226881cbe71-Paper-Conference.pdf).
 
-   ![Cross-entropy losses and mean local intrinsic dimension over the course of pre-training. Lines and shaded regions show the mean and standard deviation, respectively, across five baseline seeds. Checkpoints from steps 200 to 20, 000 are shown. LID was estimated using (M, N, L) = (256, 16384, 128).](/assets/baseline_loss_and_lid.png)
+   ![Cross-entropy losses and mean local intrinsic dimension over the course of pre-training. Lines and shaded regions show the mean and standard deviation, respectively, across five baseline seeds. Checkpoints from steps 200 to 20, 000 are shown. LID was estimated using (M, N, L) = (256, 16384, 128).](assets/baseline_loss_and_lid.png)
 
-4. **Greater depth lowers coincides with lower LID and loss**
+3. **Greater depth coincides with lower LID and loss**
 
    Going from 9 to 25 layers (in steps of 4) reduces validation LID from ~17.94 to ~15.26 and validation loss from ~2.02 to ~1.87, with diminishing returns for additional layers. This is not evidence of a causal link, since depth also changes parameter count, compute cost and long-skip connections.
 
-   ![Cross-entropy loss (top row) and mean local intrinsic dimension (bottom row) during pre-training for models with 9, 13, 17, 21 and 25 layers, evaluated on fixed first shard training (left) and validation (right) samples. Lines and shaded regions show the mean and standard deviation across three training seeds. Checkpoints from step 200 to 20, 000 are shown. LID was estimated using (M, N, L) = (256, 16384, 128).](/assets/depth_loss_and_lid.png)
+   ![Cross-entropy loss (top row) and mean local intrinsic dimension (bottom row) during pre-training for models with 9, 13, 17, 21 and 25 layers, evaluated on fixed first shard training (left) and validation (right) samples. Lines and shaded regions show the mean and standard deviation across three training seeds. Checkpoints from step 200 to 20,000 are shown. LID was estimated using (M, N, L) = (256, 16384, 128).](assets/depth_loss_and_lid.png)
 
 **Takeaway:** LID provides information about internal geometry that loss alone does not. It is useful as a complementary diagnostic of pre-training dynamics, not as a sole performance indicator.
 
@@ -61,7 +61,7 @@ uv sync
 uv run python data/cached_challenge_fineweb.py --variant sp1024 --train-shards 105
 ```
 
-This downloads the first 105 training shards along with populating `./data/datasets/fineweb10B_sp1024/` and `./data/tokenizers/` using the script provided by the [parameter-golf](https://github.com/openai/parameter-golf) repository. With 100M tokens per shard, 105 shards cover 10.49B-tokens. Downloading only a few shards makes the loader cycle through them; that changes the experiment.
+This downloads the first 105 training shards along with populating `./data/datasets/fineweb10B_sp1024/` and `./data/tokenizers/` using the script provided by the [parameter-golf](https://github.com/openai/parameter-golf) repository. With 100M tokens per shard, 105 shards cover 10.49B tokens. Downloading only a few shards makes the loader cycle through them; that changes the experiment.
 
 ### 2. Train the model
 
@@ -74,9 +74,9 @@ MAX_WALLCLOCK_SECONDS=0 \
 uv run python train_gpt.py
 ```
 
-This creates a new directory called `RUN_ID=baseline_seed_1337`, following the structure described further below. Checkpoints and logs are saved every `x` steps determined by `CHECKPOINT_EVERY` and `TRAIN_LOG_EVERY`.
+This creates a new directory called `runs/baseline_seed_1337`, following the structure described further below. Checkpoints and logs are saved every `200` steps determined by `CHECKPOINT_EVERY` and `TRAIN_LOG_EVERY`.
 
-For the five-seed baseline, repeat with seeds 1337-1341 and unique IDs. For depth comparisons, use the five depths above and seeds 1337-1339 at each depth using `NUM_LAYERS` (9, 13, 17, 21, 25).
+For the five-seed baseline, repeat with seeds 1337-1341 and unique IDs. For depth comparisons, use the five depths (9, 13, 17, 21, 25) and seeds 1337-1339 at each depth using `NUM_LAYERS` .
 
 ### 3. Compute local intrinsic dimension estimates
 
@@ -94,7 +94,7 @@ NUM_LAYERS=9 uv run python estimate_analyze_lid.py \
   --loss-batch-size 32
 ```
 
-The analysis script samples non-overlapping sequences from the first sorted training shard and first sorted validation shard. It extracts final-normalized representations, removes vectors for token IDs 0, 1, and 2, deduplicates vectors, subsamples, and estimates local dimension. If too few distinct eligible vectors remain, the vector sampler uses fewer than the requested `N`. Keep the neighborhood size below the available sample size.
+The analysis script samples non-overlapping sequences from the first sorted training shard and first sorted validation shard. It extracts final-normalized representations, removes vectors for token IDs 0, 1, and 2 (special tokens), deduplicates vectors, subsamples, and estimates local dimension. If too few distinct eligible vectors remain, the vector sampler uses fewer than the requested `N`. Keep the neighborhood size below the available sample size.
 
 Match the model and data settings to the checkpoint. The analyzer constructs the model from the current environment and does not restore architecture or data paths from the saved run configuration. For a 25-layer checkpoint, set `NUM_LAYERS=25`. Also compare against the saved `runs/<run-id>/config.json`.
 
@@ -105,16 +105,16 @@ For the completed run above:
 ```bash
 uv run python plot_loss_and_lid.py \
   --run-id baseline_seed_1337 \
-  --analysis-id <ANALYSIS_ID> \
+  --analysis-id <ANALYSIS_ID>
 
 uv run python plot_lid_vs_loss.py \
   --run-id baseline_seed_1337 \
-  --analysis-id <ANALYSIS_ID> \
+  --analysis-id <ANALYSIS_ID> 
 
 uv run python compute_kendall_tau.py \
   --run-id baseline_seed_1337 \
   --analysis-id <ANALYSIS_ID> \
-  --min-step 200 --max-step 2400 --aggregation per-seed \
+  --min-step 200 --max-step 2400 --aggregation per-seed 
 ```
 For multi-seed plots, supply further IDs after `--run-id` and the same number of matching IDs after `--analysis-id` in the same order.
 
