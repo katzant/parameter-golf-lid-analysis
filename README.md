@@ -83,6 +83,29 @@ uv run python estimate_analyze_lid.py \
 
 Outputs the results to `lid.csv`.
 
+## Project Structure
+
+```bash
+runs/<run-id>/
+  config.json                         # Training hyperparameters
+  log.txt                             # Training log
+  metrics_train.csv                   # Current-batch loss
+  metrics_val.csv                     # Full-validation loss and bits per byte
+  metrics_lr.csv                      # Learning rates
+  checkpoints/model_step_<step>.pt    # Model weights at checkpoints
+  final_model.pt                      # Final uncompressed model weights
+  final_model.int8.ptz                # Upstream quantized export
+  analysis/<analysis-id>/
+    config.json                       # Analysis arguments
+    log.txt                           # Analysis source, progress, runtime versions
+    lid.csv                           # step, train_lid, val_lid
+    zeroth_shard_sequences_loss.csv   # Fixed training-sample loss
+    val_shard_sequences_loss.csv      # Fixed validation-sample loss
+
+```
+
+The main LID results use the unquantized checkpoint files. Fixed-sample losses from the analyzer should be paired with LID when comparing the same evaluation sequences.
+
 ## References
 
 Ruppik, B. M., von Rohrscheidt, J., van Niekerk, C., Heck, M., Vukovic, R., Feng, S., Lin, H.-c.,
